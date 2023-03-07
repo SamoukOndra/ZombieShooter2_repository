@@ -5,19 +5,18 @@ using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
+    //really? proc vlastne?
     //predpoklada player transform.position.y = 0
     //float playerHeight = 2f;
 
     [Header("Movement")]
     [SerializeField] float moveSpeed = 6f;
-    //[SerializeField] float airMultiplier = 0.4f;
     float movementMultiplier = 10f;
     [SerializeField] Vector3 stepRayLower = new Vector3(0, 0.1f);
     [SerializeField] Vector3 stepRayUpper = new Vector3(0, 0.4f);
     [SerializeField] Vector3 stepsForce = new Vector3(0f, 0.5f);
     bool isOnStairs = false;
     bool sprintPressed = false;
-    //float onStairsDuration = 0.3f;
 
     [Header("Speeds")]
     [SerializeField] float walkSpeed = 4f;
@@ -48,8 +47,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float slopeLimitAngle = 45f;
     private enum slopeLevel { zero, mild, steep, notGrounded};
     private slopeLevel _slopeLevel;
+    RaycastHit slopeHit;
 
-    //temp public debug
     Vector2 moveInput;
     public Vector3 moveDirection;
     Vector3 slopeMoveDirection;
@@ -58,44 +57,9 @@ public class PlayerController : MonoBehaviour
     Animator playerAnimator;
     PlayerLook playerLook;
 
-    RaycastHit slopeHit;
 
-    //get the radius of the players capsule collider, and make it a tiny bit smaller than that
-    //float radius = capsulecollider.radius * 0.9f;
-    //get the position (assuming its right at the bottom) and move it up by almost the whole radius
-    //Vector3 pos = transform.position + Vector3.up * (radius * 0.9f);
-    //returns true if the sphere touches something on that layer
-    //bool isGrounded = Physics.CheckSphere(pos, radius, groundLayer);
 
-    private slopeLevel SlopeControl()
-    {
-        //must be grounded
-        if (Physics.Raycast(transform.position+Vector3.up, Vector3.down, out slopeHit, 2))
-        {
-            float slopeAngle = Vector3.Angle(slopeHit.normal, Vector3.up);
-            //Debug.Log(slopeAngle);
-            if (slopeHit.normal == Vector3.up) return slopeLevel.zero;
-            else if (slopeLimitAngle < slopeAngle) return slopeLevel.steep;
-            else return slopeLevel.mild;
-        }
-        else return slopeLevel.notGrounded;
-    }
 
-    void OnJump()
-    {
-        if (isGrounded)
-        {
-            Jump();
-            //playerAnimator.SetBool("jump", true);
-            playerAnimator.SetTrigger("jumped");
-            playerAnimator.SetBool("inJump", true);
-
-        }
-    }
-    void OnSprint(InputValue value)
-    {
-        sprintPressed = value.isPressed;
-    }
     private void Start()
     {
         playerLook = GetComponent < PlayerLook>();
@@ -119,7 +83,32 @@ public class PlayerController : MonoBehaviour
         _slopeLevel = SlopeControl();
         //Debug.Log(_slopeLevel);
     }
-        
+    private void FixedUpdate()
+    {
+        playerLook.RotatePlayer();
+        MovePlayer();
+        AnimatePlayer();
+    }
+    void OnJump()
+    {
+        if (isGrounded)
+        {
+            Jump();
+            //playerAnimator.SetBool("jump", true);
+            playerAnimator.SetTrigger("jumped");
+            playerAnimator.SetBool("inJump", true);
+
+        }
+    }
+    void OnSprint(InputValue value)
+    {
+        sprintPressed = value.isPressed;
+    }
+    void OnMove(InputValue value)
+    {
+        moveInput = value.Get<Vector2>();
+    }
+
     void AnimatePlayer()
     {
             // ANIMACE
@@ -185,14 +174,6 @@ public class PlayerController : MonoBehaviour
         return isGrounded;
     }
 
-    public void OnMove(InputValue value)
-    {
-        moveInput = value.Get<Vector2>();
-        //moveDirection = new Vector3(move.x, 0, move.y);
-    }
-
-    
-
     void MyInput()
     {
 
@@ -202,6 +183,19 @@ public class PlayerController : MonoBehaviour
         verticalMovement = moveInput.y;
 
         moveDirection = gameObject.transform.forward * verticalMovement + gameObject.transform.right * horizontalMovement;
+    }
+    private slopeLevel SlopeControl()
+    {
+        //must be grounded
+        if (Physics.Raycast(transform.position + Vector3.up, Vector3.down, out slopeHit, 2))
+        {
+            float slopeAngle = Vector3.Angle(slopeHit.normal, Vector3.up);
+            //Debug.Log(slopeAngle);
+            if (slopeHit.normal == Vector3.up) return slopeLevel.zero;
+            else if (slopeLimitAngle < slopeAngle) return slopeLevel.steep;
+            else return slopeLevel.mild;
+        }
+        else return slopeLevel.notGrounded;
     }
 
     void Jump()
@@ -242,12 +236,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void FixedUpdate()
-    {
-        playerLook.RotatePlayer();
-        MovePlayer();
-        AnimatePlayer();
-    }
+    
 
     void MovePlayer()
     {
