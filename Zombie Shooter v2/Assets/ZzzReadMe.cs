@@ -23,7 +23,7 @@
  * pri mireni vypnout Fifle Layer v animatoru!!! Lepsi animace ruky
  * 
  * 
- * 
+ * //kde budou neaktivni zbrane, inventory items??? v podzemi???? destroy and instantiate???
  * 
  * 
  * 

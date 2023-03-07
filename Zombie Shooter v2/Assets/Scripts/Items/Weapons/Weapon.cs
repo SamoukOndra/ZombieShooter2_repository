@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Weapon : MonoBehaviour
 {
-    public enum weaponType
+    public enum WeaponType
     {
         melee_1h,
         melee_2h,
@@ -14,12 +14,13 @@ public class Weapon : MonoBehaviour
         granade
     }
 
-    public enum positionType
+    public enum PositionType
     {
         hip_left_0,
         hip_right_1,
         back_2
     }
 
-    protected virtual void OnEnable() { }
+    public WeaponType weaponType;
+    public PositionType positionType;
 }
