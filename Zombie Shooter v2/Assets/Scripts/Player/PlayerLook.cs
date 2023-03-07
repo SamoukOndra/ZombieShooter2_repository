@@ -23,6 +23,8 @@ public class PlayerLook : MonoBehaviour
     float xRotation;
     float yRotation;
 
+    Vector3 screenCentreTarget;
+
     private void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
@@ -51,18 +53,26 @@ public class PlayerLook : MonoBehaviour
         playerModel.transform.rotation = Quaternion.Euler(0, yRotation, 0);
         //transform.rotation = Quaternion.Euler(0, yRotation, 0);
 
-        atScreenCentre.position = GetScreenCentre();
+        atScreenCentre.position = Vector3.Lerp(atScreenCentre.position, screenCentreTarget, Time.deltaTime * 20f);
         
+    }
+    private void FixedUpdate()
+    {
+        screenCentreTarget = GetScreenCentre();
     }
 
     private Vector3 GetScreenCentre()
     {
-        Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
+        Vector2 screenCenterPoint = new Vector2(Screen.width / 2f, Screen.height / 2f);
+        Ray ray = Camera.main.ScreenPointToRay(screenCenterPoint);
+        Physics.Raycast(ray, out RaycastHit hit);
+        return hit.point;
+        /*Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
         if (Physics.Raycast(ray, out RaycastHit hit))
         {
             return hit.point;
         }
-        else return Vector3.zero;
+        else return Vector3.zero;*/
     }
 
     public void RotatePlayer()

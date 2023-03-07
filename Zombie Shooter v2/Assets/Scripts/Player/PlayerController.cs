@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Cinemachine;
+using UnityEngine.Animations.Rigging;
 
 public class PlayerController : MonoBehaviour
 {
@@ -17,6 +19,14 @@ public class PlayerController : MonoBehaviour
     [SerializeField] Vector3 stepsForce = new Vector3(0f, 0.5f);
     bool isOnStairs = false;
     bool sprintPressed = false;
+
+    [Header("Aiming and shooting")]
+    [SerializeField] Rig RigRifleAim;
+    [SerializeField] CinemachineVirtualCamera aimCam;
+    [SerializeField] float blendToAimCamDuration = 0.1f;
+    public static bool weaponDrawn { get; private set; }
+    public Weapon.WeaponType activeWeaponType;
+    bool isAiming = false;
 
     [Header("Speeds")]
     [SerializeField] float walkSpeed = 4f;
@@ -56,6 +66,9 @@ public class PlayerController : MonoBehaviour
     Rigidbody rb;
     Animator playerAnimator;
     PlayerLook playerLook;
+    RigBuilder rigBuilder;
+    List<RigLayer> rigLayers;
+    
 
 
 
@@ -65,8 +78,14 @@ public class PlayerController : MonoBehaviour
         playerLook = GetComponent < PlayerLook>();
         playerAnimator = GetComponentInChildren<Animator>();
         rb = GetComponent<Rigidbody>();
+        rigBuilder = GetComponentInChildren<RigBuilder>();
+        rigLayers = rigBuilder.layers;
         rb.freezeRotation = true;
         checkRadius = playerCollider.radius * 0.9f;
+        aimCam.enabled = false;
+        weaponDrawn = false;
+        // bo se  zmeni weight rigLayers[0].active = weaponDrawn;
+        
     }
 
     private void Update()
@@ -108,64 +127,32 @@ public class PlayerController : MonoBehaviour
     {
         moveInput = value.Get<Vector2>();
     }
-
-    void AnimatePlayer()
+    void OnDrawWeapon()
     {
-            // ANIMACE
-            playerAnimator.SetBool("grounded", isGrounded);
-            if (isGrounded)
-            {
-                if (fallTimer > 0)
-                {
-
-                    fallTimer = 0f;
-                    Invoke("Landing", 0.1f);
-                    playerAnimator.SetBool("inJump", false);
-
-                }
-
-                //playerAnimator.SetBool("jump", false);
-                //playerAnimator.ResetTrigger("jumped");
-            }
-            else
-            {
-                fallTimer += Time.deltaTime;
-                if (fallTimer > setFallAnimAtSec)
-                {
-                    playerAnimator.SetBool("fall", true);
-                }
-            }
-            //idle
-            if (verticalMovement == 0 && horizontalMovement == 0) playerAnimator.SetBool("idle", true);
-            else playerAnimator.SetBool("idle", false);
-
-            //forward inc L+R
-            if ((verticalMovement > 0.0f) && (horizontalMovement == 0.0f)) playerAnimator.SetBool("runForward", true);
-            else playerAnimator.SetBool("runForward", false);
-
-            if ((verticalMovement > 0.0f) && (horizontalMovement < 0.0f)) playerAnimator.SetBool("runLeft", true);
-            else playerAnimator.SetBool("runLeft", false);
-
-            if ((verticalMovement > 0.0f) && (horizontalMovement > 0.0f)) playerAnimator.SetBool("runRight", true);
-            else playerAnimator.SetBool("runRight", false);
-
-            //backward incl L+R
-            if ((verticalMovement < 0.0f) && (horizontalMovement == 0.0f)) playerAnimator.SetBool("runBack", true);
-            else playerAnimator.SetBool("runBack", false);
-
-            if ((verticalMovement < 0.0f) && (horizontalMovement < 0.0f)) playerAnimator.SetBool("runBackLeft", true);
-            else playerAnimator.SetBool("runBackLeft", false);
-
-            if ((verticalMovement < 0.0f) && (horizontalMovement > 0.0f)) playerAnimator.SetBool("runBackRight", true);
-            else playerAnimator.SetBool("runBackRight", false);
-
-            //strafe L+R
-            if ((verticalMovement == 0.0f) && (horizontalMovement < 0.0f)) playerAnimator.SetBool("strafeLeft", true);
-            else playerAnimator.SetBool("strafeLeft", false);
-
-            if ((verticalMovement == 0.0f) && (horizontalMovement > 0.0f)) playerAnimator.SetBool("strafeRight", true);
-            else playerAnimator.SetBool("strafeRight", false);
+        weaponDrawn = !weaponDrawn;
+        //tady spis rig weight z 0 na 1, ne pri aim tu udelam
+        //rigLayers[0].active = weaponDrawn;
+        AnimateWeaponDraw(weaponDrawn, activeWeaponType);
     }
+    // !!!!!!!!!
+    public void OnAltFire(InputValue value)
+    {
+        //disable for debug
+        isAiming = value.isPressed;
+        //enableis for debug
+        //Aiming = true;
+        if (weaponDrawn)
+        {
+            aimCam.enabled = isAiming;
+            StartCoroutine(AimGunCoroutine(isAiming, RigRifleAim, blendToAimCamDuration));
+            if (isAiming)
+            {
+                
+            }
+        }
+    }
+
+
 
     bool IsGrounded()
     {
@@ -333,5 +320,95 @@ public class PlayerController : MonoBehaviour
         isOnStairs = true;
         yield return new WaitForSeconds(setFallAnimAtSec);
         isOnStairs = false;
+    }
+    IEnumerator AimGunCoroutine(bool isAiming, Rig aimRig, float timeToAim)
+    {
+        float timer = 0f;
+        if (isAiming)
+        {
+            aimRig.weight = 0;
+            while (timer < timeToAim)
+            {
+                timer += Time.deltaTime;
+                aimRig.weight += (Time.deltaTime / timeToAim);
+                yield return null;
+            }
+            aimRig.weight = 1;
+        }
+        else
+        {
+            aimRig.weight = 1;
+            while (timer < timeToAim)
+            {
+                timer += Time.deltaTime;
+                aimRig.weight -= (Time.deltaTime / timeToAim);
+                yield return null;
+            }
+            aimRig.weight = 0;
+        }
+       
+    }
+
+    // ANIMACE
+    void AnimatePlayer()
+    {
+        playerAnimator.SetBool("grounded", isGrounded);
+        if (isGrounded)
+        {
+            if (fallTimer > 0)
+            {
+
+                fallTimer = 0f;
+                Invoke("Landing", 0.1f);
+                playerAnimator.SetBool("inJump", false);
+
+            }
+
+            //playerAnimator.SetBool("jump", false);
+            //playerAnimator.ResetTrigger("jumped");
+        }
+        else
+        {
+            fallTimer += Time.deltaTime;
+            if (fallTimer > setFallAnimAtSec)
+            {
+                playerAnimator.SetBool("fall", true);
+            }
+        }
+        //idle
+        if (verticalMovement == 0 && horizontalMovement == 0) playerAnimator.SetBool("idle", true);
+        else playerAnimator.SetBool("idle", false);
+
+        //forward inc L+R
+        if ((verticalMovement > 0.0f) && (horizontalMovement == 0.0f)) playerAnimator.SetBool("runForward", true);
+        else playerAnimator.SetBool("runForward", false);
+
+        if ((verticalMovement > 0.0f) && (horizontalMovement < 0.0f)) playerAnimator.SetBool("runLeft", true);
+        else playerAnimator.SetBool("runLeft", false);
+
+        if ((verticalMovement > 0.0f) && (horizontalMovement > 0.0f)) playerAnimator.SetBool("runRight", true);
+        else playerAnimator.SetBool("runRight", false);
+
+        //backward incl L+R
+        if ((verticalMovement < 0.0f) && (horizontalMovement == 0.0f)) playerAnimator.SetBool("runBack", true);
+        else playerAnimator.SetBool("runBack", false);
+
+        if ((verticalMovement < 0.0f) && (horizontalMovement < 0.0f)) playerAnimator.SetBool("runBackLeft", true);
+        else playerAnimator.SetBool("runBackLeft", false);
+
+        if ((verticalMovement < 0.0f) && (horizontalMovement > 0.0f)) playerAnimator.SetBool("runBackRight", true);
+        else playerAnimator.SetBool("runBackRight", false);
+
+        //strafe L+R
+        if ((verticalMovement == 0.0f) && (horizontalMovement < 0.0f)) playerAnimator.SetBool("strafeLeft", true);
+        else playerAnimator.SetBool("strafeLeft", false);
+
+        if ((verticalMovement == 0.0f) && (horizontalMovement > 0.0f)) playerAnimator.SetBool("strafeRight", true);
+        else playerAnimator.SetBool("strafeRight", false);
+    }
+    void AnimateWeaponDraw(bool drawWeapon, Weapon.WeaponType activeWeaponType)
+    {
+        int animMultiplier = 1;
+        if (drawWeapon == false) animMultiplier = -1;
     }
 }

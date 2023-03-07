@@ -9,10 +9,15 @@ public class QuickItemsMenu : MonoBehaviour
     public List<Transform> quickItemsPositions;
     // mozna neni nutno, nevim este zatim
     public bool isWeapon = false;
-    public bool weaponDrawn = false;
-    public int activeWeaponIndex; // use!!!!
+    //public bool weaponDrawn = false;
+    public int activeWeaponIndex;
 
+    private PlayerController playerController;
 
+    private void Awake()
+    {
+        playerController = GetComponent<PlayerController>();
+    }
     private void SelectQI(int indexObject)
     {
         if(quickItemObjects[indexObject] != null)
@@ -31,6 +36,7 @@ public class QuickItemsMenu : MonoBehaviour
                 DeactivateWpChild(indexPosition);
                 SetWpChild(indexObject, indexPosition);
                 activeWeaponIndex = indexObject;
+                playerController.activeWeaponType = weapon.weaponType;
             }
             else
             {
