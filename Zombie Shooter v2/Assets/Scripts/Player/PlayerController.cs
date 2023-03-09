@@ -59,6 +59,13 @@ public class PlayerController : MonoBehaviour
     private slopeLevel _slopeLevel;
     RaycastHit slopeHit;
 
+    [Header("Animations")]
+    [SerializeField] int indexEquipLayer;
+    [SerializeField] float timeToEquipLayer;
+    [SerializeField] float delayToWeaponLayer;
+    [SerializeField] int indexWeaponLayer;
+    [SerializeField] float timeToWeaponLayer;
+
     Vector2 moveInput;
     public Vector3 moveDirection;
     Vector3 slopeMoveDirection;
@@ -85,7 +92,6 @@ public class PlayerController : MonoBehaviour
         aimCam.enabled = false;
         weaponDrawn = false;
         // bo se  zmeni weight rigLayers[0].active = weaponDrawn;
-        
     }
 
     private void Update()
@@ -408,7 +414,65 @@ public class PlayerController : MonoBehaviour
     }
     void AnimateWeaponDraw(bool drawWeapon, Weapon.WeaponType activeWeaponType)
     {
-        int animMultiplier = 1;
-        if (drawWeapon == false) animMultiplier = -1;
+        //jeste mixnout weights of layers
+        if (drawWeapon)
+        {
+            switch (activeWeaponType)
+            {
+                case Weapon.WeaponType.pistol:
+                    playerAnimator.SetTrigger("equipHip_R");
+                    //StartCoroutine(WeaponDrawHandleAnimLayersCoroutine(indexEquipLayer, timeToEquipLayer, delayToWeaponLayer, indexWeaponLayer, timeToWeaponLayer));
+                    break;
+
+                case Weapon.WeaponType.rifle:
+                    playerAnimator.SetTrigger("equipBack");
+                    //StartCoroutine(WeaponDrawHandleAnimLayersCoroutine(indexEquipLayer, timeToEquipLayer, delayToWeaponLayer, indexWeaponLayer, timeToWeaponLayer));
+                    break;
+                default: break;
+            }
+        }
+        else
+        {
+            switch (activeWeaponType)
+            {
+                case Weapon.WeaponType.pistol:
+                    playerAnimator.SetTrigger("disarmHip_R");
+                    break;
+
+                case Weapon.WeaponType.rifle:
+                    playerAnimator.SetTrigger("disarmBack");
+                    break;
+                default: break;
+            }
+        }
+    }
+
+    IEnumerator WeaponDrawHandleAnimLayersCoroutine(int indexEquipLayer, float timeToEquipLayer, float delayToWeaponLayer, int indexWeaponLayer, float timeToWeaponLayer)
+    {
+        float timer = 0f;
+        float equipLayerWeight = 0;
+        float weaponLayerWeight = 0;
+
+        while (timer < (timeToEquipLayer + delayToWeaponLayer + timeToWeaponLayer))
+        {
+            timer += Time.deltaTime;
+            if(timer < timeToEquipLayer)
+            {
+                equipLayerWeight += Time.deltaTime / timeToEquipLayer;
+                playerAnimator.SetLayerWeight(indexEquipLayer, equipLayerWeight);
+            }
+            else if(timer < timeToEquipLayer + delayToWeaponLayer)
+            {
+                //nic
+            }
+            else
+            {
+                equipLayerWeight -= Time.deltaTime / timeToWeaponLayer;
+                weaponLayerWeight += Time.deltaTime / timeToWeaponLayer;
+                playerAnimator.SetLayerWeight(indexEquipLayer, equipLayerWeight);
+                playerAnimator.SetLayerWeight(indexWeaponLayer, weaponLayerWeight);
+            }
+            yield return null;
+        }
     }
 }

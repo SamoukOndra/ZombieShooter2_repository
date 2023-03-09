@@ -6,10 +6,12 @@
  * 
  * 
  * OLD INPUT
- * mouse centre screen
+ * 
  * 
  * BUGY
- * mireni se trochu trha, =problem v pohybu targetu?
+ * mireni se trochu trha, =problem v pohybu targetu? vcmn ok
+ * 
+ * pokud tasena zbran a zmeni aktivni zbran, zmena insatntni
  * 
  * 
  * 
