@@ -24,27 +24,29 @@ public class QuickItemsMenu : MonoBehaviour
         {
             //todle mozna as potom, co ho ucini ditetem posice v pripade validniho pos type
             quickItemObjects[indexObject].SetActive(true);
-            Debug.Log("QI set active");
+            //Debug.Log("QI set active");
             //spis rovnou misto weaponTag plnohodnotnej script, zjisti weapon type a priradi mu pozici z qiposition(alt: wepon type separatly pro animace, pro pozice je pos type)
             //ulozi posledni wepon index, pokud posledni index stejnou qiposition jako soucasnej, deaktivuje posledni
             //if (TryGetComponent<Weapon>(out Weapon weapon))
             if(quickItemObjects[indexObject].TryGetComponent(out Weapon weapon))
             {
-                Debug.Log("QI is weapon");
+                //Debug.Log("QI is weapon");
                 isWeapon = true;
                 int indexPosition =((int)weapon.positionType);
                 DeactivateWpChild(indexPosition);
                 SetWpChild(indexObject, indexPosition);
                 activeWeaponIndex = indexObject;
                 playerController.activeWeaponType = weapon.weaponType;
+                playerController.activeWeaponTransform = quickItemObjects[indexObject].transform;
+                playerController.activeWeaponUnequipedTransform = quickItemsPositions[indexPosition];
             }
             else
             {
-                Debug.Log("QI is not a weapon");
+                //Debug.Log("QI is not a weapon");
                 isWeapon = false;
             }
         }
-        else Debug.Log("QI is null");
+        //else Debug.Log("QI is null");
     }
 
     void OnQI_1() => SelectQI(0);

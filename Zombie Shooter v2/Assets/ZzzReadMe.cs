@@ -29,7 +29,13 @@
  * 
  * 
  * 
- * 
+ * AKTUALNE
+ * interference coroutines pri equip/disarm
+ * bloknout aim pri equip/disarm
+ * elegantnejsi coroutine pro anim layers
+ * setnout weapon layer (pro rifle/pistol/...) v kodu
+ * sjednotit cas vsech equip/disarm animaci pro jednodusi animovani
+ * rig pro pistol
  * 
  * 
  * 

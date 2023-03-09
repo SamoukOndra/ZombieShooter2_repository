@@ -25,7 +25,6 @@ public class PlayerController : MonoBehaviour
     [SerializeField] CinemachineVirtualCamera aimCam;
     [SerializeField] float blendToAimCamDuration = 0.1f;
     public static bool weaponDrawn { get; private set; }
-    public Weapon.WeaponType activeWeaponType;
     bool isAiming = false;
 
     [Header("Speeds")]
@@ -63,8 +62,17 @@ public class PlayerController : MonoBehaviour
     [SerializeField] int indexEquipLayer;
     [SerializeField] float timeToEquipLayer;
     [SerializeField] float delayToWeaponLayer;
+    //tohle setnout codem aby to odpovidalo dany zbrani
     [SerializeField] int indexWeaponLayer;
     [SerializeField] float timeToWeaponLayer;
+
+    [HideInInspector] public Weapon.WeaponType activeWeaponType;
+    [HideInInspector] public Transform activeWeaponTransform;
+    [HideInInspector] public Transform activeWeaponUnequipedTransform;
+    [SerializeField] Transform palm_r;
+
+    [SerializeField] float delayToChangeParentEquipWeapon = 0.2f;
+    [SerializeField] float timeToSetNewLocalPosRotEquipWeapon = 0.3f;
 
     Vector2 moveInput;
     public Vector3 moveDirection;
@@ -414,40 +422,53 @@ public class PlayerController : MonoBehaviour
     }
     void AnimateWeaponDraw(bool drawWeapon, Weapon.WeaponType activeWeaponType)
     {
-        //jeste mixnout weights of layers
+        IEnumerator handleAnimatorLayersEquip = WeaponDrawHandleAnimLayersCoroutine(indexEquipLayer, timeToEquipLayer, delayToWeaponLayer, indexWeaponLayer, timeToWeaponLayer);
+        IEnumerator handleAnimatorLayersDisarm = WeaponDrawHandleAnimLayersCoroutine(indexEquipLayer, timeToEquipLayer, delayToWeaponLayer, indexWeaponLayer, timeToWeaponLayer, false);
+        IEnumerator handleWeaponEquipParent = Anim.SetParentAndLocalPosRotCoroutine(activeWeaponTransform, palm_r, timeToSetNewLocalPosRotEquipWeapon, Vector3.zero, Quaternion.identity, delayToChangeParentEquipWeapon);
+        IEnumerator handleWeaponDisarmParent = Anim.SetParentAndLocalPosRotCoroutine(activeWeaponTransform, activeWeaponUnequipedTransform, timeToSetNewLocalPosRotEquipWeapon, Vector3.zero, Quaternion.identity, delayToChangeParentEquipWeapon);
+        //handle layers
+        //dokoncit other cases
+        //zabranit rozjeti vicero stejnych coroutines
         if (drawWeapon)
         {
+            //StopCoroutine(handleAnimatorLayers);
             switch (activeWeaponType)
             {
                 case Weapon.WeaponType.pistol:
                     playerAnimator.SetTrigger("equipHip_R");
-                    //StartCoroutine(WeaponDrawHandleAnimLayersCoroutine(indexEquipLayer, timeToEquipLayer, delayToWeaponLayer, indexWeaponLayer, timeToWeaponLayer));
+                    StartCoroutine(handleAnimatorLayersEquip);
                     break;
 
                 case Weapon.WeaponType.rifle:
                     playerAnimator.SetTrigger("equipBack");
-                    //StartCoroutine(WeaponDrawHandleAnimLayersCoroutine(indexEquipLayer, timeToEquipLayer, delayToWeaponLayer, indexWeaponLayer, timeToWeaponLayer));
+                    StartCoroutine(handleAnimatorLayersEquip);
                     break;
                 default: break;
             }
+            StartCoroutine(handleWeaponEquipParent);
         }
         else
         {
+            playerAnimator.SetLayerWeight(indexWeaponLayer, 0);
             switch (activeWeaponType)
             {
                 case Weapon.WeaponType.pistol:
+                    StartCoroutine(handleAnimatorLayersDisarm);
                     playerAnimator.SetTrigger("disarmHip_R");
+                    
                     break;
 
                 case Weapon.WeaponType.rifle:
+                    StartCoroutine(handleAnimatorLayersDisarm);
                     playerAnimator.SetTrigger("disarmBack");
                     break;
                 default: break;
             }
+            StartCoroutine(handleWeaponDisarmParent);
         }
     }
 
-    IEnumerator WeaponDrawHandleAnimLayersCoroutine(int indexEquipLayer, float timeToEquipLayer, float delayToWeaponLayer, int indexWeaponLayer, float timeToWeaponLayer)
+    IEnumerator WeaponDrawHandleAnimLayersCoroutine(int indexEquipLayer, float timeToEquipLayer, float delayToWeaponLayer, int indexWeaponLayer, float timeToWeaponLayer, bool equip = true)
     {
         float timer = 0f;
         float equipLayerWeight = 0;
@@ -458,7 +479,7 @@ public class PlayerController : MonoBehaviour
             timer += Time.deltaTime;
             if(timer < timeToEquipLayer)
             {
-                equipLayerWeight += Time.deltaTime / timeToEquipLayer;
+                equipLayerWeight += (Time.deltaTime / timeToEquipLayer);
                 playerAnimator.SetLayerWeight(indexEquipLayer, equipLayerWeight);
             }
             else if(timer < timeToEquipLayer + delayToWeaponLayer)
@@ -467,8 +488,8 @@ public class PlayerController : MonoBehaviour
             }
             else
             {
-                equipLayerWeight -= Time.deltaTime / timeToWeaponLayer;
-                weaponLayerWeight += Time.deltaTime / timeToWeaponLayer;
+                equipLayerWeight -= (Time.deltaTime / timeToWeaponLayer);
+                if(equip) weaponLayerWeight += (Time.deltaTime / timeToWeaponLayer);
                 playerAnimator.SetLayerWeight(indexEquipLayer, equipLayerWeight);
                 playerAnimator.SetLayerWeight(indexWeaponLayer, weaponLayerWeight);
             }
