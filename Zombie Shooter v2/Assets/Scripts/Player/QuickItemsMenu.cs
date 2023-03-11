@@ -20,27 +20,32 @@ public class QuickItemsMenu : MonoBehaviour
     }
     private void SelectQI(int indexObject)
     {
-        if (playerController.isAiming) return;
+        if (playerController.isAiming || playerController.eda_block) return;
         if(quickItemObjects[indexObject] != null)
         {
             if (indexObject == activeWeaponIndex) return;
             //todle mozna as potom, co ho ucini ditetem posice v pripade validniho pos type
             quickItemObjects[indexObject].SetActive(true);
-            //Debug.Log("QI set active");
-            //spis rovnou misto weaponTag plnohodnotnej script, zjisti weapon type a priradi mu pozici z qiposition(alt: wepon type separatly pro animace, pro pozice je pos type)
-            //ulozi posledni wepon index, pokud posledni index stejnou qiposition jako soucasnej, deaktivuje posledni
-            //if (TryGetComponent<Weapon>(out Weapon weapon))
+
             if(quickItemObjects[indexObject].TryGetComponent(out Weapon weapon))
             {
-                //Debug.Log("QI is weapon");
                 isWeapon = true;
-                int indexPosition =((int)weapon.positionType);
-                DeactivateWpChild(indexPosition);
+                int indexPosition = ((int)weapon.positionType);
+                DeactivateWpChildern(indexPosition);
+                if (playerController.weaponDrawn)
+                {
+                    StartCoroutine(playerController.ChangeDrawnWeaponCoroutine(weapon.weaponType));
+                    //StartCoroutine(DeactivateWpChildAfterEdaCoroutine(indexPosition));
+                }
+                //DeactivateWpChild(indexPosition);
+
                 SetWpChild(indexObject, indexPosition);
                 activeWeaponIndex = indexObject;
                 playerController.activeWeaponType = weapon.weaponType;
                 playerController.activeWeaponTransform = quickItemObjects[indexObject].transform;
                 playerController.activeWeaponUnequipedTransform = quickItemsPositions[indexPosition];
+
+                
             }
             else
             {
@@ -57,13 +62,24 @@ public class QuickItemsMenu : MonoBehaviour
     void OnQI_4() => SelectQI(3);
     void OnQI_5() => SelectQI(4);
     //kde budou neaktivni zbrane, inventory items??? v podzemi???? destroy and instantiate???
-    void DeactivateWpChild(int indexPosition)
+    void DeactivateWpChildern(int indexPosition)
     {
-        if(quickItemsPositions[indexPosition].childCount > 0)
+        int childernAmount = quickItemsPositions[indexPosition].childCount;
+        if (childernAmount > 0)
         {
-            Transform child = quickItemsPositions[indexPosition].GetChild(0);
+            for(int i = 0; i < childernAmount; i++)
+            {
+                Transform child = quickItemsPositions[indexPosition].GetChild(i);
+                child.gameObject.SetActive(false);
+            }
             quickItemsPositions[indexPosition].DetachChildren();
-            child.gameObject.SetActive(false);
+            //se budou jako deaktivovany valet po svete? asi jo...
+
+            //quickItemsPositions[indexPosition].DetachChildren();
+            //child.gameObject.SetActive(false);
+            //List<Transform> childern = quickItemsPositions[indexPosition].;
+            //quickItemsPositions[indexPosition].DetachChildren();
+            //child.gameObject.SetActive(false);
         }
         
     }
@@ -75,6 +91,12 @@ public class QuickItemsMenu : MonoBehaviour
         item.transform.localRotation = Quaternion.identity;
         item.SetActive(true);
         
+    }
+
+    IEnumerator DeactivateWpChildAfterEdaCoroutine(int indexPosition)
+    {
+        yield return new WaitForSeconds(playerController.eda_blockDuration +1);
+        DeactivateWpChildern(indexPosition);
     }
 
 }

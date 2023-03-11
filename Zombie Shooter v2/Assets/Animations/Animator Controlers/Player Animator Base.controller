@@ -323,7 +323,7 @@ AnimatorState:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: unarmed_equip_underarm
-  m_Speed: 1.5
+  m_Speed: -1.5
   m_CycleOffset: 0
   m_Transitions: []
   m_StateMachineBehaviours: []
@@ -335,7 +335,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400000, guid: 1b83890d0a0880f4b9dc7c43dde5b91e, type: 2}
+  m_Motion: {fileID: 7400000, guid: 9fed5d5fa941ec54594df5751eabf16a, type: 2}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 

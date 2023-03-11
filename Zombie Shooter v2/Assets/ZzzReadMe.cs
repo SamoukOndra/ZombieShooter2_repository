@@ -1,4 +1,5 @@
-/*
+/*ALERT!!!!
+ * pri tasene zbrani zabranit nahrazeni jeji pozice v qi !!!!
  * 
  * PADANI vc animace: pri !isGrounded spustit timer,
  * po chvili spusti fall animaci (ne hned, bo by padal na kazdym schudku), pri delsim padu uzit pro fall dmg

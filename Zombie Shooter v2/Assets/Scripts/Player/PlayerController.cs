@@ -24,7 +24,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] Rig RigRifleAim;
     [SerializeField] CinemachineVirtualCamera aimCam;
     [SerializeField] float blendToAimCamDuration = 0.1f;
-    public static bool weaponDrawn { get; private set; }
+    public bool weaponDrawn { get; private set; }
     public bool isAiming { get; private set; }
 
     [Header("Speeds")]
@@ -60,11 +60,12 @@ public class PlayerController : MonoBehaviour
 
     [Header("Animations")]
     [SerializeField] int indexEquipLayer;
-    [SerializeField] float timeToEquipLayer;
+    //[SerializeField] float timeToEquipLayer;
+    [SerializeField] float switchLayerDuration = 0.2f;
     [SerializeField] float delayToWeaponLayer;
     //tohle setnout codem aby to odpovidalo dany zbrani
     [SerializeField] int indexWeaponLayer;
-    [SerializeField] float timeToWeaponLayer;
+    //[SerializeField] float timeToWeaponLayer;
 
     [HideInInspector] public Weapon.WeaponType activeWeaponType;
     [HideInInspector] public Transform activeWeaponTransform;
@@ -75,7 +76,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float timeToSetNewLocalPosRotEquipWeapon = 0.3f;
 
     //equipe disarm aim block
-    [SerializeField] float eda_blockDuration = 1.275f;
+    public float eda_blockDuration { get; private set; }
     public bool eda_block { get; private set; }
 
     Vector2 moveInput;
@@ -105,7 +106,7 @@ public class PlayerController : MonoBehaviour
         weaponDrawn = false;
         eda_block = false;
         isAiming = false;
-        // bo se  zmeni weight rigLayers[0].active = weaponDrawn;
+        eda_blockDuration = 2 * switchLayerDuration + delayToWeaponLayer;
     }
 
     private void Update()
@@ -328,10 +329,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void Landing()
-    {
-        playerAnimator.SetBool("fall", false);
-    }
+    
 
     void ResetIsOnStairs()
     {
@@ -345,35 +343,13 @@ public class PlayerController : MonoBehaviour
         yield return new WaitForSeconds(setFallAnimAtSec);
         isOnStairs = false;
     }
-    IEnumerator AimGunCoroutine(bool isAiming, Rig aimRig, float timeToAim)
-    {
-        float timer = 0f;
-        if (isAiming)
-        {
-            aimRig.weight = 0;
-            while (timer < timeToAim)
-            {
-                timer += Time.deltaTime;
-                aimRig.weight += (Time.deltaTime / timeToAim);
-                yield return null;
-            }
-            aimRig.weight = 1;
-        }
-        else
-        {
-            aimRig.weight = 1;
-            while (timer < timeToAim)
-            {
-                timer += Time.deltaTime;
-                aimRig.weight -= (Time.deltaTime / timeToAim);
-                yield return null;
-            }
-            aimRig.weight = 0;
-        }
-       
-    }
+    
 
     // ANIMACE
+    private void Landing()
+    {
+        playerAnimator.SetBool("fall", false);
+    }
     void AnimatePlayer()
     {
         playerAnimator.SetBool("grounded", isGrounded);
@@ -432,85 +408,124 @@ public class PlayerController : MonoBehaviour
     }
     void AnimateWeaponDraw(bool drawWeapon, Weapon.WeaponType activeWeaponType)
     {
-        IEnumerator handleAnimatorLayersEquip = WeaponDrawHandleAnimLayersCoroutine(indexEquipLayer, timeToEquipLayer, delayToWeaponLayer, indexWeaponLayer, timeToWeaponLayer);
-        IEnumerator handleAnimatorLayersDisarm = WeaponDrawHandleAnimLayersCoroutine(indexEquipLayer, timeToEquipLayer, delayToWeaponLayer, indexWeaponLayer, timeToWeaponLayer, false);
+        IEnumerator handleAnimatorLayersEquip = HandleAnimLayersCoroutine(indexEquipLayer, indexWeaponLayer, true);
+        IEnumerator handleAnimatorLayersDisarm = HandleAnimLayersCoroutine(indexEquipLayer, indexWeaponLayer, false);
         IEnumerator handleWeaponEquipParent = Anim.SetParentAndLocalPosRotCoroutine(activeWeaponTransform, palm_r, timeToSetNewLocalPosRotEquipWeapon, Vector3.zero, Quaternion.identity, delayToChangeParentEquipWeapon);
         IEnumerator handleWeaponDisarmParent = Anim.SetParentAndLocalPosRotCoroutine(activeWeaponTransform, activeWeaponUnequipedTransform, timeToSetNewLocalPosRotEquipWeapon, Vector3.zero, Quaternion.identity, delayToChangeParentEquipWeapon);
         //handle layers
         //dokoncit other cases
-        //zabranit rozjeti vicero stejnych coroutines
         if (drawWeapon)
         {
-            //StopCoroutine(handleAnimatorLayers);
+            StartCoroutine(handleAnimatorLayersEquip);
+            StartCoroutine(handleWeaponEquipParent);
             switch (activeWeaponType)
             {
                 case Weapon.WeaponType.pistol:
                     playerAnimator.SetTrigger("equipHip_R");
-                    StartCoroutine(handleAnimatorLayersEquip);
                     break;
 
                 case Weapon.WeaponType.rifle:
                     playerAnimator.SetTrigger("equipBack");
-                    StartCoroutine(handleAnimatorLayersEquip);
                     break;
                 default: break;
             }
-            StartCoroutine(handleWeaponEquipParent);
+            
         }
         else
         {
             playerAnimator.SetLayerWeight(indexWeaponLayer, 0);
+            StartCoroutine(handleWeaponDisarmParent);
+            StartCoroutine(handleAnimatorLayersDisarm);
             switch (activeWeaponType)
             {
                 case Weapon.WeaponType.pistol:
-                    StartCoroutine(handleAnimatorLayersDisarm);
                     playerAnimator.SetTrigger("disarmHip_R");
                     
                     break;
 
                 case Weapon.WeaponType.rifle:
-                    StartCoroutine(handleAnimatorLayersDisarm);
                     playerAnimator.SetTrigger("disarmBack");
                     break;
                 default: break;
             }
-            StartCoroutine(handleWeaponDisarmParent);
+            
         }
     }
+    public IEnumerator ChangeDrawnWeaponCoroutine(Weapon.WeaponType newWeaponType)
+    {
+        Transform previousWeponTransform = null;
+        if (activeWeaponType == newWeaponType) previousWeponTransform = activeWeaponTransform;
+        AnimateWeaponDraw(false, activeWeaponType);
+        StartCoroutine(EdaBlockCoroutine());
+        while (eda_block) { yield return null; }
+        if(previousWeponTransform != null)previousWeponTransform.gameObject.SetActive(false);
+        StartCoroutine(EdaBlockCoroutine());
+        AnimateWeaponDraw(true, newWeaponType);
+    }
 
-    IEnumerator WeaponDrawHandleAnimLayersCoroutine(int indexEquipLayer, float timeToEquipLayer, float delayToWeaponLayer, int indexWeaponLayer, float timeToWeaponLayer, bool equip = true)
+
+    IEnumerator AimGunCoroutine(bool isAiming, Rig aimRig, float timeToAim)
     {
         float timer = 0f;
-        float equipLayerWeight = 0;
-        float weaponLayerWeight = 0;
-
-        while (timer < (timeToEquipLayer + delayToWeaponLayer + timeToWeaponLayer))
+        if (isAiming)
         {
-            timer += Time.deltaTime;
-            if(timer < timeToEquipLayer)
+            aimRig.weight = 0;
+            while (timer < timeToAim)
             {
-                equipLayerWeight += (Time.deltaTime / timeToEquipLayer);
-                playerAnimator.SetLayerWeight(indexEquipLayer, equipLayerWeight);
+                timer += Time.deltaTime;
+                aimRig.weight += (Time.deltaTime / timeToAim);
+                yield return null;
             }
-            else if(timer < timeToEquipLayer + delayToWeaponLayer)
-            {
-                //nic
-            }
-            else
-            {
-                equipLayerWeight -= (Time.deltaTime / timeToWeaponLayer);
-                if(equip) weaponLayerWeight += (Time.deltaTime / timeToWeaponLayer);
-                playerAnimator.SetLayerWeight(indexEquipLayer, equipLayerWeight);
-                playerAnimator.SetLayerWeight(indexWeaponLayer, weaponLayerWeight);
-            }
-            yield return null;
+            aimRig.weight = 1;
         }
-    }
+        else
+        {
+            aimRig.weight = 1;
+            while (timer < timeToAim)
+            {
+                timer += Time.deltaTime;
+                aimRig.weight -= (Time.deltaTime / timeToAim);
+                yield return null;
+            }
+            aimRig.weight = 0;
+        }
 
+    }
     IEnumerator EdaBlockCoroutine()
     {
         eda_block = true;
         yield return new WaitForSeconds(eda_blockDuration);
         eda_block = false;
+    }
+    IEnumerator HandleAnimLayersCoroutine(int equipLayerIndex, int weaponLayerIndex, bool equip)
+    {
+        float timer = 0f;
+        float equipLayerWeight = 0;
+        float weaponLayerWeight = 0;
+        while (timer < eda_blockDuration)
+        {
+
+            timer += Time.deltaTime;
+            if (timer < switchLayerDuration)
+            {
+                equipLayerWeight += (Time.deltaTime / switchLayerDuration);
+                playerAnimator.SetLayerWeight(indexEquipLayer, equipLayerWeight);
+            }
+            else if (timer < switchLayerDuration + delayToWeaponLayer)
+            {
+                //nic
+            }
+            else
+            {
+                equipLayerWeight -= (Time.deltaTime / switchLayerDuration);
+                playerAnimator.SetLayerWeight(indexEquipLayer, equipLayerWeight);
+                if (equip)
+                {
+                    weaponLayerWeight += (Time.deltaTime / switchLayerDuration);
+                    playerAnimator.SetLayerWeight(indexWeaponLayer, weaponLayerWeight);
+                }  
+            }
+            yield return null;
+        }
     }
 }
