@@ -36,6 +36,8 @@
  * setnout weapon layer (pro rifle/pistol/...) v kodu
  * sjednotit cas vsech equip/disarm animaci pro jednodusi animovani
  * rig pro pistol
+ * equip nothing hodi chybu ... empty object a layer pro pestni souboj???
+ * prepinani zbrani je-li aktivni equip dela bordel
  * 
  * 
  * 

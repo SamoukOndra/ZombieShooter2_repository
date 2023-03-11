@@ -25,7 +25,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] CinemachineVirtualCamera aimCam;
     [SerializeField] float blendToAimCamDuration = 0.1f;
     public static bool weaponDrawn { get; private set; }
-    bool isAiming = false;
+    public bool isAiming { get; private set; }
 
     [Header("Speeds")]
     [SerializeField] float walkSpeed = 4f;
@@ -54,7 +54,7 @@ public class PlayerController : MonoBehaviour
 
     [Header("Slope Control")]
     [SerializeField] float slopeLimitAngle = 45f;
-    private enum slopeLevel { zero, mild, steep, notGrounded};
+    private enum slopeLevel { zero, mild, steep, notGrounded };
     private slopeLevel _slopeLevel;
     RaycastHit slopeHit;
 
@@ -73,6 +73,10 @@ public class PlayerController : MonoBehaviour
 
     [SerializeField] float delayToChangeParentEquipWeapon = 0.2f;
     [SerializeField] float timeToSetNewLocalPosRotEquipWeapon = 0.3f;
+
+    //equipe disarm aim block
+    [SerializeField] float eda_blockDuration = 1.275f;
+    public bool eda_block { get; private set; }
 
     Vector2 moveInput;
     public Vector3 moveDirection;
@@ -99,6 +103,8 @@ public class PlayerController : MonoBehaviour
         checkRadius = playerCollider.radius * 0.9f;
         aimCam.enabled = false;
         weaponDrawn = false;
+        eda_block = false;
+        isAiming = false;
         // bo se  zmeni weight rigLayers[0].active = weaponDrawn;
     }
 
@@ -143,14 +149,18 @@ public class PlayerController : MonoBehaviour
     }
     void OnDrawWeapon()
     {
+        if (eda_block || isAiming) return;
         weaponDrawn = !weaponDrawn;
         //tady spis rig weight z 0 na 1, ne pri aim tu udelam
         //rigLayers[0].active = weaponDrawn;
         AnimateWeaponDraw(weaponDrawn, activeWeaponType);
+        StartCoroutine(EdaBlockCoroutine());
+
     }
     // !!!!!!!!!
     public void OnAltFire(InputValue value)
     {
+        if (eda_block) return;
         //disable for debug
         isAiming = value.isPressed;
         //enableis for debug
@@ -495,5 +505,12 @@ public class PlayerController : MonoBehaviour
             }
             yield return null;
         }
+    }
+
+    IEnumerator EdaBlockCoroutine()
+    {
+        eda_block = true;
+        yield return new WaitForSeconds(eda_blockDuration);
+        eda_block = false;
     }
 }

@@ -20,8 +20,10 @@ public class QuickItemsMenu : MonoBehaviour
     }
     private void SelectQI(int indexObject)
     {
+        if (playerController.isAiming) return;
         if(quickItemObjects[indexObject] != null)
         {
+            if (indexObject == activeWeaponIndex) return;
             //todle mozna as potom, co ho ucini ditetem posice v pripade validniho pos type
             quickItemObjects[indexObject].SetActive(true);
             //Debug.Log("QI set active");
