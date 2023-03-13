@@ -31,18 +31,20 @@
  * 
  * 
  * AKTUALNE
- * interference coroutines pri equip/disarm
- * bloknout aim pri equip/disarm
- * elegantnejsi coroutine pro anim layers
  * setnout weapon layer (pro rifle/pistol/...) v kodu
- * sjednotit cas vsech equip/disarm animaci pro jednodusi animovani
+ * sjednotit cas vsech equip/disarm animaci pro jednodusi animovani/ solved = 1.275s
  * rig pro pistol
  * equip nothing hodi chybu ... empty object a layer pro pestni souboj???
- * prepinani zbrani je-li aktivni equip dela bordel
  * 
  * 
  * 
- * 
+ * rotacni kamera
+ * OnFire: 
+ *  projectile
+ *  recoil
+ *  spread pattern
+ *  ammo
+ *  SO guns
  * 
  * 
  * 

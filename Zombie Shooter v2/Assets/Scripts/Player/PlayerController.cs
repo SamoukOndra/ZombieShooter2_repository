@@ -67,15 +67,16 @@ public class PlayerController : MonoBehaviour
     [SerializeField] int indexWeaponLayer;
     //[SerializeField] float timeToWeaponLayer;
 
-    [HideInInspector] public Weapon.WeaponType activeWeaponType;
-    [HideInInspector] public Transform activeWeaponTransform;
-    [HideInInspector] public Transform activeWeaponUnequipedTransform;
+    /*[HideInInspector]*/ public Weapon.WeaponType activeWeaponType;
+    /*[HideInInspector]*/ public Transform activeWeaponTransform;
+    /*[HideInInspector]*/ public Transform activeWeaponUnequipedTransform;
     [SerializeField] Transform palm_r;
 
     [SerializeField] float delayToChangeParentEquipWeapon = 0.2f;
     [SerializeField] float timeToSetNewLocalPosRotEquipWeapon = 0.3f;
 
     //equipe disarm aim block
+    //duration sladeni s animacema, ty nastaveny na stejnej cas, cca 1.275s
     public float eda_blockDuration { get; private set; }
     public bool eda_block { get; private set; }
 
@@ -273,12 +274,10 @@ public class PlayerController : MonoBehaviour
     void SteepSlopeMovement()
     {
         Vector3 slopeDirection = Vector3.up - slopeHit.normal * Vector3.Dot(Vector3.up, slopeHit.normal);
-        Debug.Log(slopeDirection);
         float slideSpeed = slopeSlidingSpeed * Time.deltaTime;
         //!!!!
         Vector3 slideDirection = -slopeDirection + moveDirection;
         slideDirection.y = slideDirection.y - slopeHit.point.y;
-        Debug.Log(slideDirection);
 
         rb.AddForce(slideDirection.normalized * slideSpeed * movementMultiplier, ForceMode.Acceleration);
     }

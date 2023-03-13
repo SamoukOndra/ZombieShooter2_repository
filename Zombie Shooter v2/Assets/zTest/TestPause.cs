@@ -6,6 +6,10 @@ public class TestPause : MonoBehaviour
 {
     bool gamePaused = false;
 
+    private void Awake()
+    {
+        Cursor.visible = false;
+    }
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.P))

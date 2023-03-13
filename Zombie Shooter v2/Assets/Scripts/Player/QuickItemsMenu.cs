@@ -17,6 +17,7 @@ public class QuickItemsMenu : MonoBehaviour
     private void Awake()
     {
         playerController = GetComponent<PlayerController>();
+        SelectQI(1); //pokud tasi zbran driv nez nejakou vybere, null reference exception
     }
     private void SelectQI(int indexObject)
     {
@@ -74,12 +75,6 @@ public class QuickItemsMenu : MonoBehaviour
             }
             quickItemsPositions[indexPosition].DetachChildren();
             //se budou jako deaktivovany valet po svete? asi jo...
-
-            //quickItemsPositions[indexPosition].DetachChildren();
-            //child.gameObject.SetActive(false);
-            //List<Transform> childern = quickItemsPositions[indexPosition].;
-            //quickItemsPositions[indexPosition].DetachChildren();
-            //child.gameObject.SetActive(false);
         }
         
     }
@@ -93,10 +88,10 @@ public class QuickItemsMenu : MonoBehaviour
         
     }
 
-    IEnumerator DeactivateWpChildAfterEdaCoroutine(int indexPosition)
+    /*IEnumerator DeactivateWpChildAfterEdaCoroutine(int indexPosition)
     {
         yield return new WaitForSeconds(playerController.eda_blockDuration +1);
         DeactivateWpChildern(indexPosition);
-    }
+    }*/
 
 }
