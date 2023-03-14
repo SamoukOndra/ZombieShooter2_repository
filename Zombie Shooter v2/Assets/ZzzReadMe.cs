@@ -12,26 +12,20 @@
  * BUGY
  * mireni se trochu trha, =problem v pohybu targetu? vcmn ok
  * 
- * pokud tasena zbran a zmeni aktivni zbran, zmena insatntni
  * 
- * 
- * 
- * 
- * Animace: prepinat an.controlery spis nez layers, bo ty ocividne nefungujou
- * loopnout scifi soldiera
  * 
  * 
  * switch 3rd person view side
  * 
  * pri mireni vypnout Fifle Layer v animatoru!!! Lepsi animace ruky
- * 
+ * Co pro ostatni zbrane ???
  * 
  * //kde budou neaktivni zbrane, inventory items??? v podzemi???? destroy and instantiate???
  * 
  * 
  * 
  * AKTUALNE
- * setnout weapon layer (pro rifle/pistol/...) v kodu
+ * animace pro pistol
  * sjednotit cas vsech equip/disarm animaci pro jednodusi animovani/ solved = 1.275s
  * rig pro pistol
  * equip nothing hodi chybu ... empty object a layer pro pestni souboj???

@@ -22,8 +22,14 @@ public class PlayerLook : MonoBehaviour
     float xRotation;
     float yRotation;
 
-    Vector3 screenCentreTarget;
-
+    
+    Vector3 screenCentreTarget = Vector3.zero;
+    /*
+    Vector3 screenCentreStart;
+    float fixedUpdateTimer = 0f;
+    const float fixedUpdateFrequency = 0.02f;
+    float lerp;
+    */
     private void Awake()
     {
         playerController = GetComponent<PlayerController>();
@@ -44,6 +50,7 @@ public class PlayerLook : MonoBehaviour
     {
         atScreenCentre.position = Vector3.Lerp(atScreenCentre.position, screenCentreTarget, Time.deltaTime * 20f);
 
+
         yRotation += mouseInput.x * sensX * multiplier;
         xRotation -= mouseInput.y * sensY * multiplier;
 
@@ -57,6 +64,7 @@ public class PlayerLook : MonoBehaviour
     }
     private void FixedUpdate()
     {
+        //screenCentreStart = screenCentreTarget;
         screenCentreTarget = GetScreenCentre();
     }
 
@@ -73,4 +81,10 @@ public class PlayerLook : MonoBehaviour
         transform.rotation = Quaternion.Euler(0, yRotation, 0);
         playerModel.rotation = transform.rotation;
     }
+    /*private Vector3 LerpScreenCentrePosition()
+    {
+        /*fixedUpdateTimer = /Mathf.Clamp((fixedUpdateTimer += Time.deltaTime), 0f, fixedUpdateFrequency);
+        lerp = fixedUpdateTimer / fixedUpdateFrequency;
+        return Vector3.Lerp(screenCentreStart, screenCentreTarget, lerp);
+    }*/
 }

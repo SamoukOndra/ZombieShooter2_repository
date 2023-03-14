@@ -22,9 +22,9 @@ public class PlayerController : MonoBehaviour
     [HideInInspector] public bool isMoving { get; private set; }
 
     [Header("Aiming and shooting")]
-    [SerializeField] Rig RigRifleAim;
     [SerializeField] CinemachineVirtualCamera aimCam;
     [SerializeField] float blendToAimCamDuration = 0.1f;
+    Rig activeRig;
     public bool weaponDrawn { get; private set; }
     public bool isAiming { get; private set; }
 
@@ -60,12 +60,16 @@ public class PlayerController : MonoBehaviour
     RaycastHit slopeHit;
 
     [Header("Animations")]
-    [SerializeField] int indexEquipLayer;
+    [SerializeField] int indexAnimatorEquipLayer;
+    [SerializeField] int indexAnimatorPistolLayer;
+    [SerializeField] int indexAnimatorRifleLayer;
+    int indexAnimatorActiveWeaponLayer;
+
     //[SerializeField] float timeToEquipLayer;
     [SerializeField] float switchLayerDuration = 0.2f;
     [SerializeField] float delayToWeaponLayer;
     //tohle setnout codem aby to odpovidalo dany zbrani
-    [SerializeField] int indexWeaponLayer;
+    //[SerializeField] int indexWeaponLayer;
     //[SerializeField] float timeToWeaponLayer;
 
     /*[HideInInspector]*/ public Weapon.WeaponType activeWeaponType;
@@ -88,9 +92,7 @@ public class PlayerController : MonoBehaviour
     Rigidbody rb;
     Animator playerAnimator;
     PlayerLook playerLook;
-    RigBuilder rigBuilder;
-    List<RigLayer> rigLayers;
-    
+    RigControl rigControl;
 
 
 
@@ -100,8 +102,7 @@ public class PlayerController : MonoBehaviour
         playerLook = GetComponent < PlayerLook>();
         playerAnimator = GetComponentInChildren<Animator>();
         rb = GetComponent<Rigidbody>();
-        rigBuilder = GetComponentInChildren<RigBuilder>();
-        rigLayers = rigBuilder.layers;
+        rigControl = GetComponent<RigControl>();
         rb.freezeRotation = true;
         checkRadius = playerCollider.radius * 0.9f;
         aimCam.enabled = false;
@@ -173,7 +174,7 @@ public class PlayerController : MonoBehaviour
         if (weaponDrawn)
         {
             aimCam.enabled = isAiming;
-            StartCoroutine(AimGunCoroutine(isAiming, RigRifleAim, blendToAimCamDuration));
+            StartCoroutine(AimGunCoroutine(isAiming, activeRig, blendToAimCamDuration));
             if (isAiming)
             {
                 
@@ -410,8 +411,10 @@ public class PlayerController : MonoBehaviour
     }
     void AnimateWeaponDraw(bool drawWeapon, Weapon.WeaponType activeWeaponType)
     {
-        IEnumerator handleAnimatorLayersEquip = HandleAnimLayersCoroutine(indexEquipLayer, indexWeaponLayer, true);
-        IEnumerator handleAnimatorLayersDisarm = HandleAnimLayersCoroutine(indexEquipLayer, indexWeaponLayer, false);
+        activeRig = rigControl.GetActiveRig(activeWeaponType);
+        indexAnimatorActiveWeaponLayer = GetIndexAnimatorActiveWeaponLayer(activeWeaponType);
+        IEnumerator handleAnimatorLayersEquip = HandleAnimLayersCoroutine(indexAnimatorEquipLayer, indexAnimatorActiveWeaponLayer, true);
+        IEnumerator handleAnimatorLayersDisarm = HandleAnimLayersCoroutine(indexAnimatorEquipLayer, indexAnimatorActiveWeaponLayer, false);
         IEnumerator handleWeaponEquipParent = Anim.SetParentAndLocalPosRotCoroutine(activeWeaponTransform, palm_r, timeToSetNewLocalPosRotEquipWeapon, Vector3.zero, Quaternion.identity, delayToChangeParentEquipWeapon);
         IEnumerator handleWeaponDisarmParent = Anim.SetParentAndLocalPosRotCoroutine(activeWeaponTransform, activeWeaponUnequipedTransform, timeToSetNewLocalPosRotEquipWeapon, Vector3.zero, Quaternion.identity, delayToChangeParentEquipWeapon);
         //handle layers
@@ -435,7 +438,7 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
-            playerAnimator.SetLayerWeight(indexWeaponLayer, 0);
+            playerAnimator.SetLayerWeight(indexAnimatorActiveWeaponLayer, 0);
             StartCoroutine(handleWeaponDisarmParent);
             StartCoroutine(handleAnimatorLayersDisarm);
             switch (activeWeaponType)
@@ -451,6 +454,17 @@ public class PlayerController : MonoBehaviour
                 default: break;
             }
             
+        }
+    }
+
+    private int GetIndexAnimatorActiveWeaponLayer(Weapon.WeaponType _activeWeaponType)
+    {
+        switch (_activeWeaponType)
+        {
+            case Weapon.WeaponType.pistol: return indexAnimatorPistolLayer;
+            case Weapon.WeaponType.rifle: return indexAnimatorRifleLayer;
+            //dokoncit
+            default: return indexAnimatorPistolLayer;
         }
     }
     public IEnumerator ChangeDrawnWeaponCoroutine(Weapon.WeaponType newWeaponType)
@@ -511,7 +525,7 @@ public class PlayerController : MonoBehaviour
             if (timer < switchLayerDuration)
             {
                 equipLayerWeight += (Time.deltaTime / switchLayerDuration);
-                playerAnimator.SetLayerWeight(indexEquipLayer, equipLayerWeight);
+                playerAnimator.SetLayerWeight(indexAnimatorEquipLayer, equipLayerWeight);
             }
             else if (timer < switchLayerDuration + delayToWeaponLayer)
             {
@@ -520,11 +534,11 @@ public class PlayerController : MonoBehaviour
             else
             {
                 equipLayerWeight -= (Time.deltaTime / switchLayerDuration);
-                playerAnimator.SetLayerWeight(indexEquipLayer, equipLayerWeight);
+                playerAnimator.SetLayerWeight(indexAnimatorEquipLayer, equipLayerWeight);
                 if (equip)
                 {
                     weaponLayerWeight += (Time.deltaTime / switchLayerDuration);
-                    playerAnimator.SetLayerWeight(indexWeaponLayer, weaponLayerWeight);
+                    playerAnimator.SetLayerWeight(indexAnimatorActiveWeaponLayer, weaponLayerWeight);
                 }  
             }
             yield return null;
