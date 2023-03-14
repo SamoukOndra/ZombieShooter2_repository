@@ -614,6 +614,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6982745245111297048}
+  - {fileID: 7856635885153667148}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -631,7 +632,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   weaponType: 2
   positionType: 1
-  gunScriptableObject: {fileID: 0}
 --- !u!114 &6460806594112839388
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2212,8 +2212,8 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 0.1, y: 0.12, z: 0.2}
-  m_Center: {x: 0, y: 0.08, z: -0.02}
+  m_Size: {x: 0.05, y: 0.12000002, z: 0.19817784}
+  m_Center: {x: -0, y: 0.08, z: -0.019088909}
 --- !u!1 &7840225510947524280
 GameObject:
   m_ObjectHideFlags: 0
@@ -2712,6 +2712,37 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1 &8607360346764552238
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7856635885153667148}
+  m_Layer: 2
+  m_Name: Bullet Spawn Point
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7856635885153667148
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8607360346764552238}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.061, z: 0.171}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1034652769715533340}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8626332067339191620
 GameObject:
   m_ObjectHideFlags: 0

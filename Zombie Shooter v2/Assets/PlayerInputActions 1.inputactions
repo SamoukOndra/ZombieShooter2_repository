@@ -29,7 +29,7 @@
                     "id": "70c63518-9763-48bc-afc0-d0a9ef216473",
                     "expectedControlType": "Button",
                     "processors": "",
-                    "interactions": "",
+                    "interactions": "Press(behavior=2)",
                     "initialStateCheck": false
                 },
                 {
@@ -38,7 +38,7 @@
                     "id": "49ed3f00-8879-4541-88e8-4369d35a3806",
                     "expectedControlType": "Button",
                     "processors": "",
-                    "interactions": "",
+                    "interactions": "Press(behavior=2)",
                     "initialStateCheck": false
                 },
                 {
@@ -108,6 +108,15 @@
                     "name": "DrawWeapon",
                     "type": "Button",
                     "id": "ed919794-7ae0-49b0-9cb6-63f6d02cb610",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Reload",
+                    "type": "Button",
+                    "id": "e3c1f17b-1575-4c19-81b4-b4a36d4f9d52",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
@@ -350,7 +359,7 @@
                     "name": "",
                     "id": "c254a55a-bf20-4e05-9aa3-8828c452a002",
                     "path": "<Mouse>/rightButton",
-                    "interactions": "Press(behavior=2)",
+                    "interactions": "",
                     "processors": "",
                     "groups": "Keyboard&Mouse",
                     "action": "AltFire",
@@ -442,6 +451,17 @@
                     "processors": "",
                     "groups": "Keyboard&Mouse",
                     "action": "DrawWeapon",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "d2645222-2e77-4150-9ced-6a61df417b1d",
+                    "path": "<Keyboard>/r",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "Reload",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

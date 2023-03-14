@@ -45,7 +45,7 @@ public class QuickItemsMenu : MonoBehaviour
                 playerController.activeWeaponType = weapon.weaponType;
                 playerController.activeWeaponTransform = quickItemObjects[indexObject].transform;
                 playerController.activeWeaponUnequipedTransform = quickItemsPositions[indexPosition];
-
+                weapon.SetWeaponProperties();
                 
             }
             else

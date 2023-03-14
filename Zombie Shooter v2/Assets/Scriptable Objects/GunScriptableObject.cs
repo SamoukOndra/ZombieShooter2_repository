@@ -7,15 +7,22 @@ public class GunScriptableObject : ScriptableObject
 {
     public string gunName;
     public float timeBetweenShots;
-    public int animatorLAyer;
+    public int animatorLayer;
 
     public float maxKickBackZ;
+    public float kickBackZ;
+    public float minRotX;
     public float maxRotX;
+    public float minRotY;
     public float maxRotY;
+    public float minRotZ;
     public float maxRotZ;
 
     public float kickDuration;
     public float returnDuration;
+
+    public int magazineVolume;
+    public float reloadDuration;
 
     public ParticleSystem vfx_muzzleFlash;
     public AudioClip sfx_shot;
