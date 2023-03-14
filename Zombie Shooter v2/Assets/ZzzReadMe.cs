@@ -37,8 +37,6 @@
  * equip nothing hodi chybu ... empty object a layer pro pestni souboj???
  * 
  * 
- * 
- * rotacni kamera
  * OnFire: 
  *  projectile
  *  recoil
@@ -46,9 +44,7 @@
  *  ammo
  *  SO guns
  * 
- * 
- * 
- * 
+ * zoom camery
  * 
  * 
  * 

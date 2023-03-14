@@ -19,6 +19,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] Vector3 stepsForce = new Vector3(0f, 0.5f);
     bool isOnStairs = false;
     bool sprintPressed = false;
+    [HideInInspector] public bool isMoving { get; private set; }
 
     [Header("Aiming and shooting")]
     [SerializeField] Rig RigRifleAim;
@@ -107,6 +108,7 @@ public class PlayerController : MonoBehaviour
         weaponDrawn = false;
         eda_block = false;
         isAiming = false;
+        
         eda_blockDuration = 2 * switchLayerDuration + delayToWeaponLayer;
     }
 
@@ -126,7 +128,7 @@ public class PlayerController : MonoBehaviour
     }
     private void FixedUpdate()
     {
-        playerLook.RotatePlayer();
+        if(isMoving || isAiming) playerLook.RotatePlayer();
         MovePlayer();
         AnimatePlayer();
     }
@@ -148,6 +150,7 @@ public class PlayerController : MonoBehaviour
     void OnMove(InputValue value)
     {
         moveInput = value.Get<Vector2>();
+        isMoving = (moveInput != Vector2.zero);
     }
     void OnDrawWeapon()
     {

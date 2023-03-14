@@ -5000,8 +5000,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: da131c85b72be7a46aaf75212e072790, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sensX: 250
-  sensY: 250
   camTarget: {fileID: 1919467580}
   atScreenCentre: {fileID: 998833359}
   playerModel: {fileID: 1463385229}
