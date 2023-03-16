@@ -7,7 +7,7 @@ public class Weapon_Firearm : Weapon
 {
     public GunScriptableObject gunSO;
     [SerializeField] protected Transform bulletSpawnPoint;
-    /*[SerializeField]*/ protected Transform firearmAimTransform;
+    /*[SerializeField]*/ protected GameObject firearmAimTransform;
     private Transform baseGunAimTransform;
     private Vector3 lastGunLocalPos;
     private Quaternion lastGunLocalRot;
@@ -23,12 +23,13 @@ public class Weapon_Firearm : Weapon
     //private float timer;
 
     AudioSource audioSource;
+    ParticleSystem muzzleFlash;
     FirearmsAimPosition firearmsAimPosition;
 
     private void Start()
     {
-        //
-        //
+        muzzleFlash = Instantiate(gunSO.vfx_muzzleFlash, bulletSpawnPoint);
+        //muzzleFlash.transform.localEulerAngles = new Vector3(0f, -90, 0f); setnutý v rotate muzzleflash
     }
     //call pri equipu v QI
     public override void SetWeaponProperties()
@@ -36,7 +37,7 @@ public class Weapon_Firearm : Weapon
         firearmsAimPosition = GetComponentInParent<FirearmsAimPosition>();
         firearmAimTransform = firearmsAimPosition.GetAimTransform(weaponType);
         audioSource = GetComponentInParent<AudioSource>();
-        baseGunAimTransform = firearmAimTransform;
+        baseGunAimTransform = firearmAimTransform.transform;
         bulletsInMagazine = gunSO.magazineVolume;
         UpdateBulletsInMagazine(0);
     }
@@ -71,8 +72,8 @@ public class Weapon_Firearm : Weapon
         isShooting = value.isPressed;
         if (isShooting)
         {
-            lastGunLocalPos = firearmAimTransform.localPosition;
-            lastGunLocalRot = firearmAimTransform.localRotation;
+            lastGunLocalPos = firearmAimTransform.transform.localPosition;
+            lastGunLocalRot = firearmAimTransform.transform.localRotation;
         }
     }
     void SpawnBullet()
@@ -90,12 +91,30 @@ public class Weapon_Firearm : Weapon
         bulletsInMagazine -= reduceBy;
         magEmpty = (bulletsInMagazine == 0) ? true : false;
     }
+    void RotateMuzzleFlash(string xyzAxe, float minRot, float maxRot, Vector3 defaultRot = default(Vector3))
+    {
+        float fRot = Random.Range(minRot, maxRot);
+        switch (xyzAxe)
+        {
+            case "x": defaultRot.x += fRot;
+                break;
+            case "y": defaultRot.y += fRot;
+                break;
+            case "z": defaultRot.z += fRot;
+                break;
+            default: Debug.Log("Invalid axe");
+                break;
+        }
+        muzzleFlash.transform.localRotation = Quaternion.Euler(defaultRot);
+    }
     Vector3 GetAfterKickBackPosition()
     {
         if (lastGunLocalPos.z - gunSO.kickBackZ < -gunSO.maxKickBackZ)
             return new Vector3(0, 0, -gunSO.maxKickBackZ);
         else return new Vector3(0, 0, lastGunLocalPos.z - gunSO.kickBackZ);
     }
+
+    //nahrazuje rotaci, nepricita!!!!
     Quaternion GetAfterKickBackRotation()
     {
         float xRot = Random.Range(gunSO.minRotX, gunSO.maxRotX);
@@ -120,29 +139,35 @@ public class Weapon_Firearm : Weapon
     IEnumerator ShotCoroutine()
     {
         float timer = 0f;
+        float lerp = 0f;
         SpawnBullet();
         UpdateBulletsInMagazine(1);
-        Debug.Log("befor FX");
+        //Debug.Log("befor FX");
         audioSource.PlayOneShot(gunSO.sfx_shot);
-
-        gunSO.vfx_muzzleFlash.Play();
-        Debug.Log("after FX");
+        RotateMuzzleFlash("x", 10f, 30f, new Vector3(0f, -90f,0));
+        muzzleFlash.Play();
+        //Debug.Log("after FX");
         //FXs asi musi bejt decka
         endGunLocalPos = GetAfterKickBackPosition();
         endGunLocalRot = GetAfterKickBackRotation();
         while (timer < gunSO.kickDuration + gunSO.returnDuration)
         {
+            timer += Time.deltaTime;
+            Debug.Log(lerp);
+            //Debug.Log(timer);
             if (timer < gunSO.kickDuration)
             {
-                float lerp = timer / gunSO.kickDuration;
-                firearmAimTransform.localPosition = Vector3.Lerp(lastGunLocalPos, endGunLocalPos, lerp);
-                firearmAimTransform.localRotation = Quaternion.Lerp(lastGunLocalRot, endGunLocalRot, lerp);
+                Debug.Log("lerp kick");
+                lerp = timer / gunSO.kickDuration;
+                firearmAimTransform.transform.localPosition = Vector3.Lerp(lastGunLocalPos, endGunLocalPos, lerp);
+                firearmAimTransform.transform.localRotation = Quaternion.Lerp(lastGunLocalRot, endGunLocalRot, lerp);
             }
             else
             {
-                float lerp = (timer - gunSO.kickDuration)/gunSO.returnDuration;
-                firearmAimTransform.localPosition = Vector3.Lerp(endGunLocalPos, baseGunAimTransform.localPosition, lerp);
-                firearmAimTransform.localRotation = Quaternion.Lerp(endGunLocalRot, baseGunAimTransform.localRotation, lerp);
+                Debug.Log("lerp return");
+                lerp = (timer - gunSO.kickDuration)/gunSO.returnDuration;
+                firearmAimTransform.transform.localPosition = Vector3.Lerp(endGunLocalPos, baseGunAimTransform.localPosition, lerp);
+                firearmAimTransform.transform.localRotation = Quaternion.Lerp(endGunLocalRot, baseGunAimTransform.localRotation, lerp);
             }
             yield return null;
         }

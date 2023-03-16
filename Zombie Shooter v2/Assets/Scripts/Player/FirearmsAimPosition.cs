@@ -7,13 +7,13 @@ public class FirearmsAimPosition : MonoBehaviour
     [SerializeField] Transform pistolAim;
     [SerializeField] Transform rifleAim;
 
-    public Transform GetAimTransform(Weapon.WeaponType weaponType)
+    public GameObject GetAimTransform(Weapon.WeaponType weaponType)
     {
         switch (weaponType)
         {
-            case Weapon.WeaponType.pistol: return pistolAim;
-            case Weapon.WeaponType.rifle: return rifleAim;
-            default: return pistolAim;
+            case Weapon.WeaponType.pistol: return pistolAim.gameObject;
+            case Weapon.WeaponType.rifle: return rifleAim.gameObject;
+            default: return pistolAim.gameObject;
         }
     }
 }

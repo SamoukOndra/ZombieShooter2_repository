@@ -13,12 +13,12 @@ MonoBehaviour:
   m_Name: AK47
   m_EditorClassIdentifier: 
   gunName: AK47
-  timeBetweenShots: 0.3
+  timeBetweenShots: 0.1
   animatorLayer: 3
   maxKickBackZ: 0.5
-  kickBackZ: 0.1
+  kickBackZ: 0
   minRotX: 5
-  maxRotX: 10
+  maxRotX: 15
   minRotY: -3
   maxRotY: 3
   minRotZ: -1
