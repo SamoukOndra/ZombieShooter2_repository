@@ -9,9 +9,11 @@ public class Weapon : MonoBehaviour
     public WeaponType weaponType;
     public PositionType positionType;
 
+    protected bool isAttacking;
     public virtual void SetWeaponProperties() { }
-
-
+    public void StartAttack() { isAttacking = true; }
+    public void StopAttack() { isAttacking = false; }
+    public virtual void Reload() { }
 
     public enum WeaponType
     {

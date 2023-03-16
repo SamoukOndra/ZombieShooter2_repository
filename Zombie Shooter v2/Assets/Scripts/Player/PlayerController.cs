@@ -4,12 +4,16 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using Cinemachine;
 using UnityEngine.Animations.Rigging;
+using UnityEngine.Events;
 
 public class PlayerController : MonoBehaviour
 {
     //really? proc vlastne?
     //predpoklada player transform.position.y = 0
     //float playerHeight = 2f;
+    public UnityEvent attackStart;
+    public UnityEvent attackStop;
+    public UnityEvent reload;
 
     [Header("Movement")]
     [SerializeField] float moveSpeed = 6f;
@@ -133,6 +137,16 @@ public class PlayerController : MonoBehaviour
         MovePlayer();
         AnimatePlayer();
     }
+     void OnFire(InputValue value)
+    {
+        if (!isAiming) return;
+        if (value.isPressed) attackStart.Invoke();
+        else attackStop.Invoke();
+    }
+    void OnReload()
+    {
+        if(weaponDrawn && !isAiming) reload.Invoke();
+    }
     void OnJump()
     {
         if (isGrounded)
@@ -157,6 +171,7 @@ public class PlayerController : MonoBehaviour
     {
         if (eda_block || isAiming) return;
         weaponDrawn = !weaponDrawn;
+        if (!weaponDrawn) attackStop.Invoke();
         //tady spis rig weight z 0 na 1, ne pri aim tu udelam
         //rigLayers[0].active = weaponDrawn;
         AnimateWeaponDraw(weaponDrawn, activeWeaponType);
@@ -166,12 +181,19 @@ public class PlayerController : MonoBehaviour
     // !!!!!!!!!
     public void OnAltFire(InputValue value)
     {
+        
         if (eda_block) return;
         //disable for debug
         isAiming = value.isPressed;
+        if (weaponDrawn)
+        {
+            aimCam.enabled = isAiming;
+            StartCoroutine(AimGunCoroutine(isAiming, activeRig, blendToAimCamDuration));
+        }
+        if (!isAiming) attackStop.Invoke(); //for ranged todle funguje only
         //enableis for debug
         //Aiming = true;
-        if (weaponDrawn)
+        /*if (weaponDrawn)
         {
             aimCam.enabled = isAiming;
             StartCoroutine(AimGunCoroutine(isAiming, activeRig, blendToAimCamDuration));
@@ -179,7 +201,7 @@ public class PlayerController : MonoBehaviour
             {
                 
             }
-        }
+        }*/
     }
 
 

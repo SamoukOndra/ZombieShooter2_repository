@@ -15,17 +15,17 @@ MonoBehaviour:
   gunName: AK47
   timeBetweenShots: 0.1
   animatorLayer: 3
-  maxKickBackZ: 0.5
-  kickBackZ: 0
-  minRotX: 5
-  maxRotX: 15
-  minRotY: -3
-  maxRotY: 3
-  minRotZ: -1
-  maxRotZ: 1
+  maxKickBackZ: 0.15
+  kickBackZ: 0.07
+  minRotX: -3
+  maxRotX: -1
+  minRotY: -1
+  maxRotY: 1
+  minRotZ: -5
+  maxRotZ: 5
   kickDuration: 0.1
-  returnDuration: 0.3
+  returnDuration: 0.1
   magazineVolume: 30
   reloadDuration: 0
   vfx_muzzleFlash: {fileID: 198792769130808804, guid: 4a468d367c255284684059ad71715aa3, type: 3}
-  sfx_shot: {fileID: 8300000, guid: 30509cce9b24b3f43a272b6ec7d6d6aa, type: 3}
+  sfx_shot: {fileID: 8300000, guid: 9adfd4bc597d99e4b89e5a3d5561edea, type: 3}

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class QuickItemsMenu : MonoBehaviour
 {
@@ -46,6 +47,13 @@ public class QuickItemsMenu : MonoBehaviour
                 playerController.activeWeaponTransform = quickItemObjects[indexObject].transform;
                 playerController.activeWeaponUnequipedTransform = quickItemsPositions[indexPosition];
                 weapon.SetWeaponProperties();
+                //weapon.StartAttack = playerController.startAttack;
+                playerController.attackStart.RemoveAllListeners();
+                playerController.attackStop.RemoveAllListeners();
+                playerController.reload.RemoveAllListeners();
+                playerController.attackStart.AddListener(weapon.StartAttack);
+                playerController.attackStop.AddListener(weapon.StopAttack);
+                playerController.reload.AddListener(weapon.Reload);
                 
             }
             else
@@ -56,7 +64,10 @@ public class QuickItemsMenu : MonoBehaviour
         }
         //else Debug.Log("QI is null");
     }
-
+    public void TestMethod()
+    {
+        Debug.Log("test event");
+    }
     void OnQI_1() => SelectQI(0);
     void OnQI_2() => SelectQI(1);
     void OnQI_3() => SelectQI(2);
